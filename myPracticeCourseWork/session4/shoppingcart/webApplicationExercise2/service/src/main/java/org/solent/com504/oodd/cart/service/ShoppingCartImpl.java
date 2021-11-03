@@ -31,17 +31,54 @@ public class ShoppingCartImpl implements ShoppingCart {
 
     @Override
     public void addItemToCart(ShoppingItem shoppingItem) {
-        itemMap.put(shoppingItem.getUuid(), shoppingItem);
+        
+        boolean alreadyExists = false;
+        for (String itemUUID: itemMap.keySet()){
+            ShoppingItem shoppingCartItem = itemMap.get(itemUUID);
+            if (shoppingCartItem.getName().equals(shoppingItem.getName())){
+                Integer quantity = shoppingCartItem.getQuantity();
+                shoppingCartItem.setQuantity(quantity+1);
+                alreadyExists = true;
+                break;
+            }
+        }
+        if(!alreadyExists) {
+            shoppingItem.setQuantity(1);
+            itemMap.put(shoppingItem.getUuid(), shoppingItem);
+        }
     }
 
     @Override
     public void removeItemFromCart(String itemUuid) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        itemMap.remove(itemUuid);
+    }
+    
+    @Override
+    public void reduceItemFromCart(String itemUuid) {
+        ShoppingItem shoppingCartItem = itemMap.get(itemUuid);
+        Integer quantity = shoppingCartItem.getQuantity();
+        if (quantity > 1){
+            shoppingCartItem.setQuantity(quantity-1);
+        } else {
+            itemMap.remove(itemUuid);
+        }
+        
+    }
+    
+    @Override
+    public void increaseItemFromCart(String itemUuid) {
+        ShoppingItem shoppingCartItem = itemMap.get(itemUuid);
+        Integer quantity = shoppingCartItem.getQuantity();
+        shoppingCartItem.setQuantity(quantity+1);
     }
 
     @Override
     public double getTotal() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double total = 0;
+        for (String itemUUID: itemMap.keySet()) {
+            ShoppingItem shoppingCartItem = itemMap.get(itemUUID);
+            total = total + shoppingCartItem.getPrice() * shoppingCartItem.getQuantity();
+        }
+        return total;
     }
-
 }

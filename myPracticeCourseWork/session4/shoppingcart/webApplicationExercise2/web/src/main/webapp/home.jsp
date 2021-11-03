@@ -11,7 +11,7 @@
 <%@ page import="org.solent.com504.oodd.cart.model.dto.ShoppingItem" %>
 <%@ page import="org.solent.com504.oodd.cart.web.WebObjectFactory"%>
 <%
-
+    request.setAttribute("selectedPage","home");
     String message="";
 
     ShoppingService shoppingService = WebObjectFactory.getShoppingService();
@@ -29,12 +29,19 @@
     if ("addItemToCart".equals(action)) {
         message = "adding "+itemName + " to cart";
         ShoppingItem shoppingItem = shoppingService.getNewItemByName(itemName);
-        message = "adding "+itemName + " to cart : "+shoppingItem;
         shoppingCart.addItemToCart(shoppingItem);
     }
-    if ("removeItemFromCart".equals(action)) {
+    else if ("removeItemFromCart".equals(action)) {
         message = "removing "+itemName + " from cart";
         shoppingCart.removeItemFromCart(itemUuid);
+    }
+    else if ("reduceItemFromCart".equals(action)) {
+        message = "reducing  "+itemName + " in cart";
+        shoppingCart.reduceItemFromCart(itemUuid);
+    }
+    else if ("increaseItemFromCart".equals(action)) {
+        message = "increasing "+itemName + " in cart";
+        shoppingCart.increaseItemFromCart(itemUuid);
     } else {
         message = "action="+action;
     }
@@ -42,6 +49,7 @@
 %>
 <!DOCTYPE html>
 <html>
+    <jsp:include page="header.jsp" />
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Shopping Cart</title>
@@ -56,13 +64,14 @@
             <tr>
                 <th>Item Name</th>
                 <th>Price</th>
-                <th></th>
+                <th>Quantity</th>
             </tr>
 
             <% for (ShoppingItem item : shoppingService.getAvailableItems()) {%>
             <tr>
                 <td><%=item.getName()%></td>
                 <td><%=item.getPrice()%></td>
+                <td><%=item.getQuantity()%></td>
                 <td></td>
                 <td>
                     <!-- post avoids url encoded parameters -->
@@ -95,14 +104,41 @@
                     <!-- post avoids url encoded parameters -->
                     <form action="./home.jsp" method="get">
                         <input type="hidden" name="itemUUID" value="<%=item.getUuid()%>">
+                        <input type="hidden" name="itemName" value="<%=item.getName()%>">
+                        <input type="hidden" name="action" value="reduceItemFromCart">
+                        <button type="submit" >-</button>
+                    </form> 
+                </td>
+                <td>
+                    <!-- post avoids url encoded parameters -->
+                    <form action="./home.jsp" method="get">
+                        <input type="hidden" name="itemUUID" value="<%=item.getUuid()%>">
+                        <input type="hidden" name="itemName" value="<%=item.getName()%>">
                         <input type="hidden" name="action" value="removeItemFromCart">
-                        <button type="submit" >Remove Item</button>
+                        <button type="submit" ><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+  <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+</svg></button>
+                    </form> 
+                </td>
+                <td>
+                    <!-- post avoids url encoded parameters -->
+                    <form action="./home.jsp" method="get">
+                        <input type="hidden" name="itemUUID" value="<%=item.getUuid()%>">
+                        <input type="hidden" name="itemName" value="<%=item.getName()%>">
+                        <input type="hidden" name="action" value="increaseItemFromCart">
+                        <button type="submit" >+</button>
                     </form> 
                 </td>
             </tr>
             <% }%>
+            <tr>
+                <td>TOTAL</td>
+                <td><%=shoppingCart.getTotal()%></td>
+            </tr>
 
         </table>
 
     </body>
+    <jsp:include page="footer.jsp" />
 </html>
